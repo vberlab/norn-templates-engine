@@ -1,0 +1,130 @@
+{# ===========================
+  Minimal universal nginx template (Jinja2)
+  Assumes canonical ctx:
+
+  ctx = {
+    name: str,
+    revision: str,
+    author: str,
+    src: str,
+    create_time: any (iso_time filter),
+    template_path: str,
+    hash: str,
+
+    ips: [str],                          # REQUIRED
+    server_name: str,                    # default: ctx.name
+    ssl_domain: str,                     # REQUIRED if https enabled
+
+    enable_http: bool,                   # default: true
+    enable_https: bool,                  # default: true
+
+    rewrite: str|None,                   # raw snippet ONLY if allow_raw_snippets
+    allow_raw_snippets: bool,            # default: false
+
+    upstreams: [ {name, zone, keepalive, servers:[str], mode?:str} ],  # default: []
+    include: {                           # all lists
+      global: [str],
+      server: [str]
+    },
+    server: { directive: str|[str] },    # default: {}
+    locations: { "/path": { directive: str|[str] } },                  # default: {}
+    metrics_disable: bool
+  }
+=========================== #}
+
+# !!!ATTENTION!!! This file was deployed automatically. All manual changes will be canceled by next deploy task
+# domain: {{ ctx.name }}
+# revision: {{ ctx.revision }} created by {{ ctx.author }} from {{ ctx.src }} at {{ ctx.create_time|iso_time }}
+# template: {{ ctx.template_path }}
+# hash: {{ ctx.hash }}
+
+{# ---------- helpers ---------- #}
+{% macro render_directives(d) -%}
+{%- for opt, value in d.items() -%}
+  {%- if value is iterable and (value is not string) -%}
+    {%- for v in value -%}
+{{ opt }} {{ v }}{% if opt != "limit_except" %};{% endif %}
+    {%- endfor -%}
+  {%- else -%}
+{{ opt }} {{ value }}{% if opt != "limit_except" %};{% endif %}
+  {%- endif -%}
+{%- endfor -%}
+{%- endmacro %}
+
+{% macro render_listen(ips, port, extra="") -%}
+{%- for ip in ips -%}
+listen {{ ip }}:{{ port }}{% if extra %} {{ extra }}{% endif %};
+{%- endfor -%}
+{%- endmacro %}
+
+{# ---------- upstreams ---------- #}
+{% for upstream in ctx.upstreams %}
+upstream {{ upstream.name }} {
+  {%- if upstream.mode %}
+  {{ upstream.mode }};
+  {%- endif %}
+  zone {{ upstream.zone }};
+  {%- for s in upstream.servers %}
+  server {{ s }};
+  {%- endfor %}
+  keepalive {{ upstream.keepalive }};
+}
+{% endfor %}
+
+{# ---------- global includes ---------- #}
+{% for inc in (ctx.include.global if ctx.include is defined and ctx.include.global is defined else []) %}
+{%- include inc %}
+{% endfor %}
+
+{# ---------- HTTP server (optional) ---------- #}
+{% if ctx.enable_http is not defined or ctx.enable_http %}
+server {
+  {{ render_listen(ctx.ips, 80) }}
+  server_name {{ ctx.server_name if ctx.server_name is defined else ctx.name }};
+  charset utf-8;
+
+  {# rewrite/redirect policy: allow raw only if allow_raw_snippets #}
+  {% if ctx.rewrite is defined and ctx.rewrite and (ctx.allow_raw_snippets is defined and ctx.allow_raw_snippets) %}
+  {{ ctx.rewrite | safe }}
+  {% else %}
+  return 301 https://$server_name$request_uri;
+  {% endif %}
+}
+{% endif %}
+
+{# ---------- HTTPS server (optional) ---------- #}
+{% if ctx.enable_https is not defined or ctx.enable_https %}
+server {
+  {{ render_listen(ctx.ips, 443, "ssl http2") }}
+  server_name {{ ctx.server_name if ctx.server_name is defined else ctx.name }};
+  charset utf-8;
+
+  ssl_certificate ssl/{{ ctx.ssl_domain }}.crt;
+  ssl_certificate_key ssl/{{ ctx.ssl_domain }}.key;
+
+  {# server directives #}
+  {% if ctx.server is defined %}
+  {{ render_directives(ctx.server) }}
+  {% endif %}
+
+  {# server includes #}
+  {% for inc in (ctx.include.server if ctx.include is defined and ctx.include.server is defined else []) %}
+  {%- include inc %}
+  {% endfor %}
+
+  {# common debug/metrics include (optional to keep hardcoded) #}
+  {%- include "common/include/debug_locations.j2" %}
+
+  {# locations #}
+  {% for path, opts in ctx.locations.items() %}
+  location {{ path }} {
+    {{ render_directives(opts) | indent(4, true) }}
+  }
+  {% endfor %}
+
+  {% if ctx.metrics_disable is defined and ctx.metrics_disable %}
+  location ~* /(metrics|debug|pprof|trace) { return 444; }
+  {% endif %}
+}
+{% endif %}
+

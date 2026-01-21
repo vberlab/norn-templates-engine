@@ -35,7 +35,7 @@ class TemplateFsRepoIndexBuilder(TemplateRepoIndexBuilder):
                         self._errors[name].append(errors.TemplateContentIsNotFile())
             else:
                 self._errors[name].append(errors.TemplateMissingContentFile())
-        return {name: data["content"] for name, data in self.raw_index.items()}
+        return dict({name: data["content"] for name, data in self.raw_index.items()})
 
     def index_includes(self):
         """
@@ -51,13 +51,13 @@ class TemplateFsRepoIndexBuilder(TemplateRepoIndexBuilder):
                 self.raw_index[name].update({
                     "includes": [item.name for item in Path(f"{path_object.absolute()}/includes").iterdir() if item.is_file()]
                 })
-        return {name: data["includes"] for name, data in self.raw_index.items()}
+        return dict({name: data["includes"] for name, data in self.raw_index.items()})
 
     def index_names(self):
         """
             Index template names without errors
         """
-        return (item for item in self.raw_index.keys() if not self.errors[item])
+        return tuple((item for item in self.raw_index.keys() if not self.errors[item]))
 
 
 
