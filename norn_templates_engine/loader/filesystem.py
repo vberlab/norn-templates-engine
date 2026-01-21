@@ -16,7 +16,7 @@ class TemplateFsRepoIndexBuilder(TemplateRepoIndexBuilder):
         self._root = root
         super().__init__()
         self.root_paths = Path(self.root)
-        self.raw_index = {item.name: {"path_obj": item} for item in self.root_paths.iterdir() if item.is_dir()}
+        self.raw_index = {item.name: {"path_object": item} for item in self.root_paths.iterdir() if item.is_dir()}
         self._errors = {template: list() for template in self.raw_index.keys()}
 
 

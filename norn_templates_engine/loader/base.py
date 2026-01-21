@@ -42,7 +42,7 @@ class TemplatesRepoIndex:
             raise errors.TemplateNotFoundError(f"Template {template_name} does not exists")
         if not self.template_includes[template_name]:
             return
-        paths = (f"{template_name}/include/{include_part}"for include_part in self.template_includes[template_name])
+        paths = (f"{template_name}/includes/{include_part}"for include_part in self.template_includes[template_name])
         if full_path:
             paths = (f"{self.root}/{include_item_path}" for include_item_path in paths )
         return paths
@@ -63,7 +63,7 @@ class TemplateRepoIndexBuilder(ABC):
 
     @property
     def errors(self):
-        return errors
+        return self._errors
 
     @abstractmethod
     def index_names(self):
@@ -188,10 +188,10 @@ class TemplateLoader(ABC):
         """
             Load template from cache
         """
-        if template_name not in self._cache.keys():
-            raise errors.TemplateNotCachedError()
+        if template_name not in self._cache.template_names:
+            raise errors.TemplateNotCachedError(f"Template {template_name} not cached")
         else:
-            return self.cache[template_name]
+            return self.cache.template_packs[template_name]
 
     def get_template(self, template_name: str) -> TemplatePack:
         """
