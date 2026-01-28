@@ -12,7 +12,8 @@ def test_cache_add_duplicate_raises():
         includes={
             "include_part": "/templates/test_pack/include/include_part",
             "include_second_part": "/templates/test_pack/include/include_second_part"
-        }
+        },
+        service_type="nginx"
     )
     cache.add(pack)
     with pytest.raises(errors.TemplateCachheExists):
@@ -27,7 +28,8 @@ def test_cache_update_replaces():
         includes={
             "include_part": "/templates/test_pack/include/include_part",
             "include_second_part": "/templates/test_pack/include/include_second_part"
-        }
+        },
+        service_type="nginx"
     )
     updated_pack = TemplatePack(
         name="test_pack",
@@ -36,7 +38,8 @@ def test_cache_update_replaces():
         includes={
             "include_part": "/templates/test_pack/include/include_part",
             "include_second_part": "/templates/test_pack/include/include_second_part"
-        }
+        },
+        service_type="nginx"
     )
     cache.add(pack)
     cache.update(updated_pack)

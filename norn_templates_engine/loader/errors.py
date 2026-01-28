@@ -1,11 +1,13 @@
 """
     Errors for templates loaders
 """
+from norn_templates_engine.errors import NornError
 
-class LoaderError(Exception):
+class LoaderError(NornError):
     """
         Base class for template loaders error
     """
+    PREFIX = "LOADER"
     code = "LOADER_ERROR"
 
 class TemplateNotCachedError(LoaderError):
