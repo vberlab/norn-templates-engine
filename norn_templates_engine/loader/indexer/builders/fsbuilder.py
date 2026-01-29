@@ -16,6 +16,7 @@ class FileSystemIndexBuilder(BaseIndexBuilder):
 
     def __init__(self, root: str):
         super().__init__(root)
+        self._build_raw_index()
 
     @staticmethod
     def search_file(file_name: str, path: Path) -> tuple[str, str]:
@@ -26,35 +27,37 @@ class FileSystemIndexBuilder(BaseIndexBuilder):
         for _name, _abs in _files:
             if re.match(file_name, _name) is not None:
                 absolute_path = _abs
+                found_file_name = _name
                 break
         else:
             raise errors.TemplateIndexBuildFileNotFound(f"{file_name} not found in {path.absolute().as_posix()}")
-        return file_name, absolute_path
+        return found_file_name, absolute_path
 
     def _search_policy(self, path: Path) -> tuple[str, str]:
         """
             Search policy file
         """
-        return self.search_file(file_name=r"*.policy", path=path)
+        return self.search_file(file_name=r"^\w*\.policy$", path=path)
 
     def _search_content(self, path: Path) -> tuple[str, str]:
         """
             Search content file
         """
-        return self.search_file(file_name=r"*.content", path=path)
+        return self.search_file(file_name=r"^\w*\.content$", path=path)
     @staticmethod
     def search_dir(dir_name: str, path: Path) -> tuple[str, str]:
         """
             Search directory in passed path
         """
-        _dirs = [(item.name, item.absolute().as_posix() for item in path.iterdir() if item.is_dir())]
+        _dirs = [(item.name, item.absolute().as_posix()) for item in path.iterdir() if item.is_dir()]
         for _name, _abs in _dirs:
             if re.match(dir_name, _name) is not None:
                 absolute_path = _abs
+                found_dir_name = _name
                 break
         else:
             raise errors.TemplateIndexBuildFileNotFound(f"{dir_name} not found in {path.absolute().as_posix()}")
-        return dir_name, absolute_path
+        return found_dir_name, absolute_path
 
     def _search_include(self, path: Path) -> tuple[str, str]:
         """
@@ -118,10 +121,12 @@ class FileSystemIndexBuilder(BaseIndexBuilder):
             pass
         except Exception as e:
             raise errors.TemplatesIndexBuildError(
-                f"Unhandled error occurred when search include parts forlder for template {template_name}"
+                f"Unhandled error occurred when search include parts folder for template {template_name}"
             ) from e
+        else:
+            includes = self.fetch_files(path=Path(includes[-1]))
         return {
-            template_name: {
+            path.absolute().as_posix(): {
                 "content": content,
                 "policy": policy,
                 "include": includes
@@ -141,7 +146,7 @@ class FileSystemIndexBuilder(BaseIndexBuilder):
         _template_dirs = self.fetch_dirs(path=path, mask=r'^(?!\s*include\s*$).+')  # Fetch all dirs except include
         _include_dir = self._search_include(path=path)
         try:
-            service_index[service_name]["policy"] = self._search_policy()
+            service_index["policy"] = self._search_policy(path=path)
         except errors.TemplateIndexBuildFileNotFound as e:
             raise errors.TemplateIndexBuildFileNotFound(
                 f"Missing policy file for service {service_name}, service must have a policy"
@@ -199,7 +204,7 @@ class FileSystemIndexBuilder(BaseIndexBuilder):
                 include_parts += srv_index["include"]
             for tmpl_index in srv_index["templates"].values():
                 if tmpl_index["include"]:
-                    include_parts += tmpl_index["include"]
+                    include_parts += list([item[-1] for item in tmpl_index["include"]])
         return include_parts
 
     def build_include_parts_by_service_index(self) -> dict[str, list[str]]:
@@ -210,7 +215,7 @@ class FileSystemIndexBuilder(BaseIndexBuilder):
                 include_parts_by_service[srv] += index["include"]
             for tmpl_index in index["templates"].values():
                 if tmpl_index["include"]:
-                    include_parts_by_service[srv] += tmpl_index["include"]
+                    include_parts_by_service[srv] += list([item[-1]for item in tmpl_index["include"]])
         return include_parts_by_service
 
     def fetch_templates_content(self) -> dict[str, str]:
@@ -220,7 +225,7 @@ class FileSystemIndexBuilder(BaseIndexBuilder):
         templates_content = dict()
         for srv_index in self.raw_index.values():
             for name, values in srv_index["templates"].items():
-                templates_content.update({name: values["content"]})
+                templates_content.update({name: values["content"][-1]})
         return templates_content
 
     def fetch_templates_policy(self) -> dict[str, str]:
@@ -235,5 +240,5 @@ class FileSystemIndexBuilder(BaseIndexBuilder):
                 policy = values.get("policy")
                 if policy is None:
                     policy = srv_policy
-                templates_policy.update({name: policy})
+                templates_policy.update({name: policy[-1]})
         return templates_policy

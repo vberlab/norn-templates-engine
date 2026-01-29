@@ -25,12 +25,12 @@ class TemplatesIndex:
     @property
     def templates_service_types(self):
         return self._template_service_types
-    def _validate_template_service_types(self, value):
+    def _validate_template_service_types(self):
         return helpers.validate_list_of_str(self.templates_service_types, "templates service types")
     @property
     def include_parts(self):
         return self._include_parts
-    def _validate_include_parts(self, value):
+    def _validate_include_parts(self):
         return helpers.validate_list_of_str(self.include_parts, "include parts")
     @property
     def templates_content(self):
@@ -66,7 +66,7 @@ class TemplatesIndex:
             return status, validation_errors
         validation_errors = list(validation_errors)
         for key, val in self.template_by_service_index.items():
-            status, _errors = helpers.validate_list_of_str(val)
+            status, _errors = helpers.validate_list_of_str(val, "templates_by_service_index")
             if not status:
                 validation_errors += _errors
         if validation_errors:
@@ -88,7 +88,7 @@ class TemplatesIndex:
             return status, validation_errors
         validation_errors = list(validation_errors)
         for key, val in self.include_parts_by_service_index.items():
-            status, _errors = helpers.validate_list_of_str(val)
+            status, _errors = helpers.validate_list_of_str(val, "include_parts_by_service")
             if not status:
                 validation_errors += _errors
         if validation_errors:
@@ -116,5 +116,6 @@ class TemplatesIndex:
             _errors += validation_errors
 
         if _errors:
+            import ipdb; ipdb.set_trace()
             raise errors.TemplateIndexValidationError(errors=_errors)
         

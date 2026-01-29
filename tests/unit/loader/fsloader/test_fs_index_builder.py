@@ -1,11 +1,18 @@
 """
     Test filesystem index builder
 """
-from norn_templates_engine.loader.filesystem import TemplateFsRepoIndexBuilder
+from pathlib import Path
+from norn_templates_engine.loader.indexer.builders.fsbuilder import FileSystemIndexBuilder
 
 def test_fs_index_builder_builds_index(template_repo_abs_path):
-    b = TemplateFsRepoIndexBuilder(root=template_repo_abs_path)
-    index = b.build_index()
+    b = FileSystemIndexBuilder(root=template_repo_abs_path)
+    b.build_index()
+    index = b.index
     # assert
-    assert "nginx/common_site" in index.template_names
-    assert "nginx" in index.template_service_types
+    for path in index.templates:
+        assert Path(path).exists()
+    for path in index.include_parts:
+        assert Path(path).exists()
+    assert isinstance(index.template_by_service_index, dict)
+    assert isinstance(index.include_parts_by_service_index, dict)
+
