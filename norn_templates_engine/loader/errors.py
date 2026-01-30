@@ -22,5 +22,18 @@ class TemplateContentIsNotFile(LoaderError):
 class TemplateMissingContentFile(LoaderError):
     code = "TEMPLATE_MISSING_CONTENT_FILE"
 
-class TemplateCachheExists(LoaderError):
+class TemplateCacheError(LoaderError):
+    """
+        Base class for template cache errors
+    """
+    PREFIX = "CACHE"
+    code = "TEMPLATE_CACHE_ERROR"
+
+class TemplateCachheExists(TemplateCacheError):
     code = "TEMPLATE_CACHE_EXISTS"
+
+class TemplateCacheTtlInvalidType(TemplateCacheError):
+    code = "CACHE_OBJECT_TTL_VALUE_INVALID_TYPE"
+
+class TemplateCacheObjectInvalidType(TemplateCacheError):
+    code = "CACHE_OBJECT_INVALID_TYPE"
