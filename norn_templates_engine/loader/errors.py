@@ -37,3 +37,9 @@ class TemplateCacheTtlInvalidType(TemplateCacheError):
 
 class TemplateCacheObjectInvalidType(TemplateCacheError):
     code = "CACHE_OBJECT_INVALID_TYPE"
+
+class TemplateCacheUpdateObjectError(TemplateCacheError):
+    code = "CACHE_OBJECT_UPDATE_ERROR"
+
+class TemplateCacheAddObjectError(TemplateCacheError):
+    code = "CACHE_OBJECT_ADD_ERROR"

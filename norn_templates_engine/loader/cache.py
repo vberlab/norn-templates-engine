@@ -158,21 +158,49 @@ class TemplateLoaderCache:
     def get_object_by_index(self, indx: int) -> TemplateLoaderCacheObject|None:
         return self.cache_objects[indx]
 
-    def _add_to_cache(self, obj: TemplateLoaderCacheObject):
+    def _add_to_cache(self, obj: TemplateLoaderCacheObject) -> int:
         """
             Add object to cache
         """
-        pass
+        self.cache_objects.append(obj)
+        return self.last_index
 
-    def _update_cached(self, obj: TemplateLoaderCacheObject):
+    def _update_cached(self, obj: TemplateLoaderCacheObject, indx: int):
         """
             Update object in cache
         """
-        pass
+        self.cache_objects[indx] = obj
 
     def caching(self, obj: TemplateLoaderCacheObject) -> bool:
         """
-            Wrapper method for caching object
+            Wrapper method for caching object.
         """
+        if not isinstance(obj, TemplateLoaderCacheObject):
+            raise errors.TemplateCacheObjectInvalidType(
+                f"Passed invalid object to caching. Passed type {type(obj)}, expected {TemplateLoaderCacheObject}"
+            )
         _obj = obj
-        #TODO: Develop add and update methods
+        # Check object if object exists in the cache
+        _exist, _indx = self.exists(obj=obj)
+        if _exist and self.get_object_by_index(_indx).expired:
+            try:
+                self._update_cached(obj=obj)
+            except Exception as e:
+                raise errors.TemplateCacheUpdateObjectError(
+                    f"Error {e} occurred, when update object {_indx} {obj.obj.name}"
+                ) from e
+            else:
+                #TODO: Logging success result
+                return True
+        if not _exist:
+            try:
+                self._add_to_cache(obj=obj)
+            except Exception as e:
+                raise errors.TemplateCacheAddObjectError(
+                    f"Error {e} occurred, when add object to cache {obj.obj.name}"
+                ) from e
+            else:
+                #TODO: Logging success result
+                return True
+        if _exist and not  self.get_object_by_index(_indx).expired:
+            return False
