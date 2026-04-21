@@ -1,15 +1,13 @@
 """
-    Classes for render errors
+    Render errors
 """
+from norn_templates_engine.errors import NornTemplateError
 
-class RenderError(Exception):
-    """
-        Base class for rendering template errors
-    """
-    code: str = "RENDER_ERROR"
+class RenderError(NornTemplateError):
+    pass
 
-class RenderFailed(RenderError):
-    code = "RENDER_FAILED"
+class ContextProcessorError(RenderError):
+    pass
 
-class NormalizeFailed(RenderError):
-    code = "NORMALIZE_FAILED"
+class FragmentCheckError(RenderError):
+    pass
