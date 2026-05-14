@@ -19,7 +19,8 @@ APP_CONFIG_SCHEMA = {
     "template_source": {
         "type": str,
         "required": True,
-        "allowed": ["git", "fs"]
+        "allowed": ["git", "fs"],
+        "dependency": ["template_fs_source", "template_git_source"]
     },
     "template_fs_source": {
         "type": dict,
