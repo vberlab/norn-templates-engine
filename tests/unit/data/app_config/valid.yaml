@@ -1,0 +1,19 @@
+api:
+  host: 0.0.0.0
+  port: 8433
+template_source: fs
+template_fs_source:
+  root: /tmp/norn-template-engine-tests/templates
+template_git_source:
+  url: https://fake-git.com
+  branch: master
+  root: templates
+template_local_cache_dir: /tmp/norn-template-engine-test/local-cache
+template_engine:
+  strict_undefined: True
+  trim_blocks: True
+  lstrip_blocks: True
+context_policy:
+  allow_unknown_fields: True
+logging:
+  level: DEBUG

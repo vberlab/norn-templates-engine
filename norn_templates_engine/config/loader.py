@@ -3,11 +3,10 @@
 """
 import yaml
 from pathlib import Path
-from typing import Mapping
 from norn_templates_engine.config import AppConfig, ConfigModel
 from norn_templates_engine.config import errors
 from norn_templates_engine.config.validator import ConfigurationValidator
-
+from norn_templates_engine.config.schema import APP_CONFIG_SCHEMA
 
 class ConfigLoader:
 
@@ -21,7 +20,7 @@ class ConfigLoader:
         return self._build_config(data=_data)
 
     @staticmethod
-    def _check_config_path(self, path: Path) -> None:
+    def _check_config_path(path: Path) -> None:
         """
             Check config file avail by passed path or raise error
         """
@@ -32,7 +31,7 @@ class ConfigLoader:
         return
 
     @staticmethod
-    def _read_yaml(self, path: Path) -> dict:
+    def _read_yaml(path: Path) -> dict:
         """
             Read yaml data from configuration file
         """
@@ -46,28 +45,28 @@ class ConfigLoader:
         if data is None:
             raise errors.ConfigEmpty(f"Empty config file. Some options must declared explicity.")
         if not isinstance(data, dict):
-            raise errors.ConfigValidationError(f"Invalid data type {type(data.__name__)}, must be mapping object")
+            raise errors.ConfigValidationError(f"Invalid data type {type(data).__name__}, must be mapping object")
         return data
 
     @staticmethod
-    def _validate(self, data: dict):
+    def _validate(data: dict):
         """
             Validate configuration data
         """
-        return ConfigurationValidator.validate(data=data)
+        return ConfigurationValidator().validate(data=data, schema=APP_CONFIG_SCHEMA)
 
     @staticmethod
-    def _build_config(self, data: dict):
+    def _build_config(data: dict):
         """
             Build AppConfig class
         """
         return AppConfig(
             api=ConfigModel.Api(**data.get("api")),
             template_source=ConfigModel.TemplateSource(data.get("template_source")),
-            template_fs_source=ConfigModel.TemplateFsSource(data.get("template_fs_source")),
-            template_git_source=ConfigModel.TemplateGitSource(data.get("template_git_source")),
+            template_fs_source=ConfigModel.TemplateFsSource(**data.get("template_fs_source")),
+            template_git_source=ConfigModel.TemplateGitSource(**data.get("template_git_source")),
             template_local_cache_dir=ConfigModel.TemplateLocalCacheDir(data.get("template_local_cache_dir")),
-            template_engine=ConfigModel.TemplateEngine(data.get("template_engine")),
-            context_policy=ConfigModel.ContextPolicy(data.get("context_policy")),
-            logging=ConfigModel.Logging(data.get("logging"))
+            template_engine=ConfigModel.TemplateEngine(**data.get("template_engine")),
+            context_policy=ConfigModel.ContextPolicy(**data.get("context_policy")),
+            logging=ConfigModel.Logging(**data.get("logging"))
         )
