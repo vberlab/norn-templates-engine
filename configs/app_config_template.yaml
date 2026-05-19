@@ -1,0 +1,19 @@
+api:
+  host: <default 127.0.0.1>
+  port: <default 8080>
+template_source: <define fs or git>
+template_fs_source:
+  root: <define templates root path on local filesystem>
+template_git_source:
+  url: <define url to git repository with templates>
+  branch: <git branch, default master>
+  root: <optional root directory under repository root, default repository root>
+template_local_cache_dir: <define>
+template_engine:
+  strict_undefined: <default True>
+  trim_blocks: <default True>
+  lstrip_blocks: <default True>
+context_policy:
+  allow_unknown_fields: <default False>
+logging:
+  level: <default INFO>

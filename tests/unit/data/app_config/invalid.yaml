@@ -1,0 +1,12 @@
+api:
+  host: 127.0.0.1
+  port: 8080
+
+template_source:
+  type: fs
+  root: /srv/templates
+
+template_engine:
+  strict_undefined: true
+  trim_blocks: true
+    lstrip_blocks: true
