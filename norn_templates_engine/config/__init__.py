@@ -40,6 +40,7 @@ class ConfigModel:
     @dataclass(frozen=True, slots=True)
     class Logging:
         level: str
+        format: str
 
 @dataclass(frozen=True, slots=True)
 class AppConfig:
