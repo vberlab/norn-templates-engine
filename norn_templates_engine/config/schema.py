@@ -95,6 +95,15 @@ APP_CONFIG_SCHEMA = {
                 "type": str,
                 "default": "INFO",
                 "allowed": ("DEBUG", "INFO", "WARNING", "ERROR")
+            },
+            "format": {
+                "type": str,
+                "default": (
+                    "%(asctime)s ",
+                    "[%(levelname)s] ",
+                    "%(name)s ",
+                    "%(message)s "
+                )
             }
         }
     }
