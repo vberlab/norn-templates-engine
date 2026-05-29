@@ -49,7 +49,7 @@ class FsSource(TemplateSource):
             if self.is_dir(_str_current) and (_max_depth > 0 or _max_depth == -1):
                 yield from self.iter_files(_str_current, _max_depth-1)
             elif self.is_file(_current):
-                yield PurePosixPath(_current)
+                yield PurePosixPath(_current).relative_to(self.root)
 
     def is_dir(self, path: str) -> bool:
         _path = Path(self.root, path)

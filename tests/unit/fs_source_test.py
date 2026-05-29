@@ -140,67 +140,67 @@ def test_iter_files_from_root_max_depth_0(source: FsSource, fs_template_dir: py.
     files = list(source.iter_files(max_depth=0))
     assert len(files) == len(FLAT)
     for file in FLAT:
-        assert PurePosixPath(fs_template_dir, file) in files
+        assert PurePosixPath(file) in files
 
 
 def test_iter_files_from_root_max_depth_1(source: FsSource, fs_template_dir: py.path.LocalPath):
     files = list(source.iter_files(max_depth=1))
     assert len(files) == len(FLAT + FILES_LEVEL_1)
     for file in FLAT + FILES_LEVEL_1:
-        assert PurePosixPath(fs_template_dir, file) in files
+        assert PurePosixPath(file) in files
 
 
 def test_iter_files_from_root_max_depth_infinite(source: FsSource, fs_template_dir: py.path.LocalPath):
     files = list(source.iter_files(max_depth=-1))
     assert len(files) == len(ALL_FILES)
     for file in ALL_FILES:
-        assert PurePosixPath(fs_template_dir, file) in files
+        assert PurePosixPath(file) in files
 
 
 def test_iter_files_from_root_max_depth_too_small(source: FsSource, fs_template_dir: py.path.LocalPath):
     files = list(source.iter_files(max_depth=-5))
     assert len(files) == len(ALL_FILES)
     for file in ALL_FILES:
-        assert PurePosixPath(fs_template_dir, file) in files
+        assert PurePosixPath(file) in files
 
 
 def test_iter_files_from_root_max_depth_too_big(source: FsSource, fs_template_dir: py.path.LocalPath):
     files = list(source.iter_files(max_depth=5))
     assert len(files) == len(ALL_FILES)
     for file in ALL_FILES:
-        assert PurePosixPath(fs_template_dir, file) in files
+        assert PurePosixPath(file) in files
 
 
 def test_iter_files_from_subdirectory_max_depth_0(source: FsSource, fs_template_dir: py.path.LocalPath):
     files = list(source.iter_files(DIR_1))
     assert len(files) == len(FILES_LEVEL_1)
     for file in FILES_LEVEL_1:
-        assert PurePosixPath(fs_template_dir, file) in files
+        assert PurePosixPath(file) in files
 
 
 def test_iter_files_from_subdirectory_max_depth_1(source: FsSource, fs_template_dir: py.path.LocalPath):
     files = list(source.iter_files(DIR_1, max_depth=1))
     assert len(files) == len(FILES_LEVEL_1 + FILES_LEVEL_2)
     for file in FILES_LEVEL_1 + FILES_LEVEL_2:
-        assert PurePosixPath(fs_template_dir, file) in files
+        assert PurePosixPath(file) in files
 
 
 def test_iter_files_from_subdirectory_max_depth_infinite(source: FsSource, fs_template_dir: py.path.LocalPath):
     files = list(source.iter_files(DIR_1, max_depth=-1))
     assert len(files) == len(SUBDIRS)
     for file in SUBDIRS:
-        assert PurePosixPath(fs_template_dir, file) in files
+        assert PurePosixPath(file) in files
 
 
 def test_iter_files_from_subdirectory_max_depth_too_small(source: FsSource, fs_template_dir: py.path.LocalPath):
     files = list(source.iter_files(DIR_1, max_depth=-5))
     assert len(files) == len(SUBDIRS)
     for file in SUBDIRS:
-        assert PurePosixPath(fs_template_dir, file) in files
+        assert PurePosixPath(file) in files
 
 
 def test_iter_files_from_subdirectory_max_depth_too_big(source: FsSource, fs_template_dir: py.path.LocalPath):
     files = list(source.iter_files(DIR_1, max_depth=5))
     assert len(files) == len(SUBDIRS)
     for file in SUBDIRS:
-        assert PurePosixPath(fs_template_dir, file) in files
+        assert PurePosixPath(file) in files
