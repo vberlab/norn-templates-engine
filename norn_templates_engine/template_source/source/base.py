@@ -5,11 +5,13 @@ from abc import ABC, abstractmethod
 from pathlib import PurePosixPath
 from typing import Iterable
 
+
 class TemplateSource(ABC):
     """
         Abstract template source(git, fs, etc...)
         Read-only
     """
+
     def __init__(self, root: str = ".") -> None:
         self.root = PurePosixPath(root)
 
@@ -22,7 +24,7 @@ class TemplateSource(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def iter_files(self, root: str = ".") -> Iterable[PurePosixPath]:
+    def iter_files(self, root: str = ".", max_depth: int = 0) -> Iterable[PurePosixPath]:
         raise NotImplementedError
 
     @abstractmethod
